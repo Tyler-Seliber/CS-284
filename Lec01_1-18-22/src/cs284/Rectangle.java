@@ -1,6 +1,8 @@
+package cs284;
+
 public class Rectangle {
-    double width;
-    double height;
+    protected double width;
+    private double height;
 
     static int numberOfRectangles = 0;
 
