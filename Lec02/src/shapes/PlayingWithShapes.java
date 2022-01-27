@@ -15,8 +15,18 @@ public class PlayingWithShapes {
 
             }
 
-//        Circle c = new Circle(3.4);
-//        System.out.print("Circle 0 has area " + c.area());
+            try {
+                Circle c = new Circle(-1.3);
+                System.out.print("Circle 0 has area " + c.area());
+            } catch (Throwable e) {
+                System.out.println("alas, poor circle, i knew him well.  " + e.getMessage());
+            }
         }
     }
 }
+
+//              Throwable
+//      Error___/      \___Exception <-- checked by default
+//                          \___RuntimeException <--- unchecked
+//                              \___IllegalArgumentException
+//
