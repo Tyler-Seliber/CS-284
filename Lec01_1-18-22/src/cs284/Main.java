@@ -1,5 +1,4 @@
 package cs284;
-import cs284.Rectangle;
 // Lecture 1/20/22
 
 /* modifiers:
