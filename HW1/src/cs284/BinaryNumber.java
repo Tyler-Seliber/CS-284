@@ -101,16 +101,18 @@ public class BinaryNumber {
 
     // Binary number addition
     public void add(BinaryNumber aBinaryNumber) {
+        // Make a copy of aBinaryNumber to avoid modifying the original
+        BinaryNumber bn = new BinaryNumber(aBinaryNumber.toString());
         // If the lengths are different, pad the shorter one with zeros
-        if (this.length() != aBinaryNumber.length()) {
+        if (this.length() != bn.length()) {
             BinaryNumber smaller;
             BinaryNumber larger;
-            if (this.length() > aBinaryNumber.length()) {
-                smaller = aBinaryNumber;
+            if (this.length() > bn.length()) {
+                smaller = bn;
                 larger = this;
             } else {
                 smaller = this;
-                larger = aBinaryNumber;
+                larger = bn;
             }
 
             int[] leadingZeros = new int[larger.length() - smaller.length()];
@@ -121,7 +123,7 @@ public class BinaryNumber {
         int carry = 0;
         // Add all but the most significant digits
         for (int i = 0; i < length(); i += 1) {
-            int sum = this.data[i] + aBinaryNumber.data[i] + carry;
+            int sum = this.data[i] + bn.data[i] + carry;
             if (sum >= 2) {
                 carry = 1;
                 this.data[i] = sum - 2; // Subtract 2 to get a binary bit
