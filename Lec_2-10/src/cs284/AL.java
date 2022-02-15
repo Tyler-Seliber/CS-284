@@ -26,4 +26,19 @@ public class AL<E> {
 
         return true;
     }
+
+    public void add(int index, E e) {
+        if (size == data.length) {
+            reallocate();
+        }
+
+        // first, everybody move over
+        for (int i = size - 1; i >= size; i -= 1) {
+            data[i + 1] = data[i];
+        }
+
+        // then, write the element in
+        data[index] = e;
+        size += 1;
+    }
 }
