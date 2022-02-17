@@ -8,7 +8,7 @@ package cs284;
 import java.util.ArrayList;
 
 public class IDLList<E> {
-    private class Node<E> {
+    private class Node {
         E data;
         Node next;
         Node prev;
@@ -19,7 +19,7 @@ public class IDLList<E> {
             this.prev = null;
         }
 
-        public Node(E elem, Node<E> next, Node<E> prev) {
+        public Node(E elem, Node next, Node prev) {
             this.data = elem;
             this.next = next;
             this.prev = prev;
@@ -27,22 +27,22 @@ public class IDLList<E> {
     }
 
     private Node head;
-    private Node<E> tail;
+    private Node tail;
     private int size;
-    private ArrayList<Node<E>> indices;
+    private ArrayList<Node> indices;
 
     public IDLList() {
         this.head = null;
         this.tail = null;
         this.size = 0;
-        this.indices = new ArrayList<Node<E>>();
+        this.indices = new ArrayList<Node>();
     }
 
     public boolean add(int index, E elem) {
         // Check if the index is out of bounds
         checkIndex(index);
 
-        Node<E> newNode = new Node<E>(elem);
+        Node newNode = new Node(elem);
         // Check if the list is empty, if so, add the element to the head
         if (size == 0) {
             head = newNode;
