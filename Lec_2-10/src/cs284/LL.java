@@ -1,12 +1,8 @@
 package cs284;
 
-public class LL<E> {
-    // Inner class
-    // As an inner class, Node knows about type E so you don't need to re-parameterize it
-    class Node { // note: no public (private not needed)
-        private E data;
-        private Node next;
-    }
+import java.util.Iterator;
+
+public class LL<E> implements Iterable {
 
     private Node head; // null means the empty list
 
@@ -79,5 +75,50 @@ public class LL<E> {
 
     public E remove(int index) { // very similar to add
         return null;
+    }
+
+    class I implements Iterator<E> {
+        private Node cur = head;
+
+        @Override
+        public boolean hasNext() {
+            // has Next when cur (current node) is not null
+            return cur != null;
+        }
+
+        @Override
+        public E next() {
+            E elt = cur.data;
+            cur = cur.next;
+            return elt;
+        }
+    }
+
+    @Override
+    public Iterator iterator() {
+        return new I();
+    }
+
+    // Inner class
+    // As an inner class, Node knows about type E so you don't need to re-parameterize it
+    class Node { // note: no public (private not needed)
+        private E data;
+        private Node next;
+    }
+
+    public static void main(String[] args) {
+        LL<String> l = new LL<>();
+        l.add(0, "a");
+        l.add(1, "b");
+        l.add(2, "c");
+
+        // for loop is "accidentally quadratic"
+//        for (int i = 0; i < l.size(); i++) {
+//            System.out.println(l.get(i));
+//        }
+
+        for (Object s : l) { // should be String instead of Object
+            System.out.println(s);
+        }
     }
 }
