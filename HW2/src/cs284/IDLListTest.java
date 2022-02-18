@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.*;
 class IDLListTest {
 
     IDLList<String> list1 = new IDLList<>();
-    IDLList<String> list2 = new IDLList<>();
 
     @Test
     void testConstructor() {
@@ -118,17 +117,37 @@ class IDLListTest {
     @Test
     void testRemoveFirst() {
         list1 = generateList();
+
         assertEquals("the", list1.removeFirst());
         assertEquals(8, list1.size());
         assertEquals("[quick, brown, fox, jumps, over, the, lazy, dog]", list1.toString());
+
+        // Test when list only contains one element
+        list1 = new IDLList<>();
+        list1.add("the");
+        try {
+            assertEquals("the", list1.removeFirst());
+        } catch (IndexOutOfBoundsException _e) {
+            fail("IndexOutOfBoundsException: " + _e);
+        }
     }
 
     @Test
     void testRemoveLast() {
         list1 = generateList();
+
         assertEquals("dog", list1.removeLast());
         assertEquals(8, list1.size());
         assertEquals("[the, quick, brown, fox, jumps, over, the, lazy]", list1.toString());
+
+        // Test when list only contains one element
+        list1 = new IDLList<>();
+        list1.add("the");
+        try {
+            assertEquals("the", list1.removeLast());
+        } catch (IndexOutOfBoundsException _e) {
+            fail("IndexOutOfBoundsException: " + _e);
+        }
     }
 
     @Test
@@ -170,6 +189,16 @@ class IDLListTest {
         } catch (Throwable t) {
             fail("Unexpected exception: " + t);
         }
+
+        try {
+            list1 = new IDLList<>();
+            list1.removeAt(0);
+            fail("Expected IndexOutOfBoundsException");
+        } catch (IndexOutOfBoundsException _e) {
+            // expected
+        } catch (Throwable t) {
+            fail("Unexpected exception: " + t);
+        }
     }
 
     @Test
@@ -196,11 +225,14 @@ class IDLListTest {
 
     @Test
     void testToString() {
+        list1 = generateList();
+        assertEquals("[the, quick, brown, fox, jumps, over, the, lazy, dog]", list1.toString());
     }
 
     IDLList<String> generateList() {
-        IDLList<String> list = new IDLList<>();
         String[] words = {"the", "quick", "brown", "fox", "jumps", "over", "the", "lazy", "dog"};
+
+        IDLList<String> list = new IDLList<>();
         for (String s : words) {
             list.append(s);
         }
