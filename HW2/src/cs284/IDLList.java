@@ -13,13 +13,13 @@ public class IDLList<E> {
         Node next;
         Node prev;
 
-        public Node(E elem) {
+        Node(E elem) {
             this.data = elem;
             this.next = null;
             this.prev = null;
         }
 
-        public Node(E elem, Node next, Node prev) {
+        Node(E elem, Node next, Node prev) {
             this.data = elem;
             this.next = next;
             this.prev = prev;
@@ -42,28 +42,31 @@ public class IDLList<E> {
         // Check if the index is out of bounds
         checkIndex(index);
 
-        Node newNode = new Node(elem);
+        // Create a referebce to a new node
+        Node newNode;
+
         // Check if the list is empty, if so, add the element to the head
         if (size == 0) {
+            newNode = new Node(elem, null, null);
             head = newNode;
             tail = head;
         } else if (index == 0) { // If the index is 0, set the new node as the head
-            newNode.next = head;
+            newNode = new Node(elem, head, null);
             head.prev = newNode;
             head = newNode;
         } else if (index == size) { // If the index is size, set the new node as the tail
-            newNode.prev = tail;
+            newNode = new Node(elem, null, tail);
             tail.next = newNode;
             tail = newNode;
-        } else {
-            newNode.next = indices.get(index);
-            newNode.prev = indices.get(index - 1);
+        } else { // If the index is in the middle, set the new node as the next node after the index
+            newNode = new Node(elem, indices.get(index), indices.get(index - 1));
             newNode.next.prev = newNode;
             newNode.prev.next = newNode;
         }
 
         indices.add(index, newNode);
         size += 1;
+        
         return true;
     }
 
@@ -76,6 +79,9 @@ public class IDLList<E> {
     }
 
     public E get(int index) {
+        // Check if index is out of bounds
+        checkIndex(index);
+
         return indices.get(index).data;
     }
 
@@ -111,7 +117,7 @@ public class IDLList<E> {
             indices.get(index + 1).prev = null;
         } else if (index == size - 1) { // Removing the tail
             tail = indices.get(index - 1);
-        } else {
+        } else { // Removing an element in the middle
             indices.get(index - 1).next = indices.get(index + 1);
             indices.get(index + 1).prev = indices.get(index - 1);
         }
@@ -136,6 +142,7 @@ public class IDLList<E> {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("[");
+
         for (int i = 0; i < size; i += 1) {
             sb.append(indices.get(i).data);
             if (i != size - 1) {
@@ -148,7 +155,7 @@ public class IDLList<E> {
 
     // Check for IndexOutOfBounds
     private void checkIndex(int index) {
-        if (index < 0 || index > size) { // MIGHT BE A PROBLEM WITH > INSTEAD OF >=
+        if (index < 0 || index > size) {
             indexOutOfBounds(index);
         }
     }
