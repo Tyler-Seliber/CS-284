@@ -1,3 +1,8 @@
+/**
+ * Name: Tyler Seliber
+ * I pledge my honor that I have abided by the Stevens Honor System.
+ */
+
 package cs284;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -31,6 +36,7 @@ class BinarySearchTest {
         assertEquals(8, BinarySearch.binarySearch('i', b));
         assertEquals(9, BinarySearch.binarySearch('j', b));
         assertEquals(-1, BinarySearch.binarySearch('k', b));
+        assertEquals(-1, BinarySearch.binarySearch('A', b));
 
         Integer[] c = new Integer[0];
         try {

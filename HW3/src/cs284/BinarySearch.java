@@ -20,15 +20,15 @@ public class BinarySearch {
         }
 
         int mid = lo + (hi - lo) / 2;
-        E x = a[mid];
+        E val = a[mid];
 
         // If elt < x, search the left half
-        if (elt.compareTo(x) < 0) {
+        if (elt.compareTo(val) < 0) {
             return binarySearch(elt, a, lo, mid);
         }
 
         // If elt > x, search the right half
-        if (elt.compareTo(x) > 0) {
+        if (elt.compareTo(val) > 0) {
             return binarySearch(elt, a, mid + 1, hi);
         }
 
