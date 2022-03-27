@@ -6,28 +6,73 @@
 package cs284;
 
 public class BST<E extends Comparable<? super E>> {
-    // you'll want to define a Node type here
-    // ... but you have to design it yourself!
 
-    public BST();
+    class Node {
+        E data;
+        Node left;
+        Node right;
 
-    public int size();
+        Node(E data) {
+            this.data = data;
+            left = null;
+            right = null;
+        }
+    }
 
-    public int height();
+    Node root;
+    int size;
 
-    public isPerfect();
+    public BST() {
+        root = null;
+        size = 0;
+    }
 
-    public isDegenerate();
+    public int size() {
+        return size;
+    }
 
-    public E insert(E); // returns old element
+    public int height() {
+        // TODO
+        return 0;
+    }
 
-    public E lookup(E); // throws exception when not found
+    public boolean isPerfect() {
+        // TODO
+        return false;
+    }
 
-    public boolean contains(E);
+    public boolean isDegenerate() {
+        // TODO
+        return false;
+    }
 
-    public E remove(E); // returns old element (or null if not found)
+    public E insert(E tgt) { // returns old element
+        // TODO
+        return null;
+    }
 
-    public static BST<Integer> makeDegenerate(int size);
+    public E lookup(E tgt) { // throws exception when not found
+        // TODO
+        return null;
+    }
 
-    public static BST<Integer> makePerfect(int height);
+    public boolean contains(E tgt) {
+        // TODO
+        return false;
+    }
+
+    public E remove(E tgt) { // returns old element (or null if not found)
+        // TODO
+        return null;
+    }
+
+    public static BST<Integer> makeDegenerate(int size) {
+        // TODO
+        return null;
+    }
+
+    public static BST<Integer> makePerfect(int height) {
+        // TODO
+        return null;
+    }
 }
