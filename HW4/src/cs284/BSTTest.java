@@ -59,6 +59,18 @@ class BSTTest {
         assertEquals(4, bst.size());
         assertEquals(3, bst.height());
 
+        // Insert duplicate element (2)
+        //        3
+        //       / \
+        //      1   5
+        //       \
+        //        2
+        assertEquals(2, bst.insert(2));
+        assertEquals(2, bst.lookup(2));
+        assertTrue(bst.contains(2));
+        assertEquals(4, bst.size());
+        assertEquals(3, bst.height());
+
         // Insert 4
         //        3
         //       / \
@@ -290,5 +302,4 @@ class BSTTest {
         assertTrue(perfectTree7.isPerfect());
     }
 
-}
 }
