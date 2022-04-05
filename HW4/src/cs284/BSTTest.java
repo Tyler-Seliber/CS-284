@@ -206,6 +206,38 @@ class BSTTest {
     }
 
     @Test
+    void testRemove2() {
+        // Generate this tree:
+        //        10
+        //       /  \
+        //      6    15
+        //       \   /
+        //       8  12
+        //      / \
+        //     7   9
+
+        BST<Integer> bst = new BST<>();
+        bst.insert(10);
+        bst.insert(6);
+        bst.insert(15);
+        bst.insert(8);
+        bst.insert(12);
+        bst.insert(7);
+        bst.insert(9);
+
+
+        // Remove 8
+        //        10
+        //       /  \
+        //      6    15
+        //       \   /
+        //       9  12
+        //      /
+        //     7
+        assertEquals(8, bst.remove(8));
+    }
+
+    @Test
     void isPerfect() {
         // Generate this tree:
         //             4
