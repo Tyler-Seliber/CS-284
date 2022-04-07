@@ -5,6 +5,8 @@
 
 package cs284;
 
+import java.util.Random;
+
 public class BST<E extends Comparable<? super E>> {
 
     class Node {
@@ -22,6 +24,24 @@ public class BST<E extends Comparable<? super E>> {
             this.data = data;
             this.left = left;
             this.right = right;
+        }
+
+        int children() {
+            int children = 0;
+            if (left != null) {
+                children += 1;
+            }
+            if (right != null) {
+                children += 1;
+            }
+            return children;
+        }
+
+        Node getOnlyChild() {
+            if (children() > 1) {
+                throw new IllegalStateException("Node has more than one child");
+            }
+            return left != null ? left : right;
         }
     }
 
@@ -64,14 +84,22 @@ public class BST<E extends Comparable<? super E>> {
     }
 
     public boolean isPerfect() {
-        // TODO
-        return false;
+        // A perfect BST of height h has 2^(h-1) - 1 nodes
+        return (size() == (Math.pow(2, height()) - 1));
     }
 
     public boolean isDegenerate() {
-        // TODO
-        return false;
+        Node current = root;
+        try {
+            while (current != null) {
+                current = current.getOnlyChild();
+            }
+            return true;
+        } catch (IllegalStateException e) { // thrown if current has more than one child
+            return false;
+        }
     }
+
 
     public E insert(E tgt) { // returns old element
         // Insert into an empty tree
@@ -232,12 +260,39 @@ public class BST<E extends Comparable<? super E>> {
     }
 
     public static BST<Integer> makeDegenerate(int size) {
-        // TODO
-        return null;
+        BST<Integer> degenerateTree = new BST<>();
+        for (int i = 0; i < size; i += 1) {
+            degenerateTree.insert(i);
+        }
+        return degenerateTree;
     }
 
     public static BST<Integer> makePerfect(int height) {
-        // TODO
-        return null;
+        // Determine the number of nodes in the tree
+        int nodes = (int) ((Math.pow(2, height)) - 1);
+        Integer[] values = new Integer[nodes];
+        // Fill the array with values in sorted order
+        for (int i = 0; i < nodes; i += 1) {
+            values[i] = i + 1;
+        }
+
+        // Sorted arrays represent inorder traveral of the tree
+        BST<Integer> perfectTree = new BST<>();
+        perfectTree.root = perfectTree.makePerfectHelper(values, 0, nodes - 1);
+
+        return perfectTree;
     }
+
+    private Node makePerfectHelper(E[] values, int start, int end) {
+        if (start > end) {
+            return null;
+        }
+        int mid = (start + end) / 2;
+        Node newNode = new Node(values[mid]);
+        newNode.left = makePerfectHelper(values, start, mid - 1);
+        newNode.right = makePerfectHelper(values, mid + 1, end);
+
+        return newNode;
+    }
+
 }
