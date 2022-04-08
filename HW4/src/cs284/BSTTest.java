@@ -2,6 +2,8 @@ package cs284;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.NoSuchElementException;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class BSTTest {
@@ -101,6 +103,21 @@ class BSTTest {
             fail("Expected RuntimeException");
         } catch (RuntimeException e) { /* Expected */ }
 
+//        // Test getParent()
+//        assertEquals(bst.getRoot().left, bst.getParentNode(1).left);
+//        assertEquals(bst.getRoot(), bst.getParentNode(1));
+//        assertEquals(bst.getRoot().left.right, bst.getParentNode(2).right);
+//        assertEquals(bst.getRoot().left, bst.getParentNode(2));
+//        assertEquals(bst.getRoot().right, bst.getParentNode(5).right);
+//        assertEquals(bst.getRoot().right, bst.getParentNode(4));
+//        try {
+//            bst.getParentNode(6);
+//        } catch (NoSuchElementException e) { /* Expected */ }
+//
+//        try {
+//            bst.getParentNode(3);
+//        } catch (RuntimeException e) { /* Expected */ }
+
     }
 
     @Test
@@ -130,8 +147,8 @@ class BSTTest {
         assertFalse(bst.contains(4));
         try {
             bst.lookup(4);
-            fail("Expected RuntimeException");
-        } catch (RuntimeException e) { /* Expected */ }
+            fail("Expected NoSuchElementException");
+        } catch (NoSuchElementException e) { /* Expected */ }
 
         // Remove 5
         //        3
@@ -145,16 +162,18 @@ class BSTTest {
         assertFalse(bst.contains(5));
         try {
             bst.lookup(5);
-            fail("Expected RuntimeException");
-        } catch (RuntimeException e) { /* Expected */ }
+            fail("Expected NoSuchElementException");
+        } catch (NoSuchElementException e) { /* Expected */ }
 
         // Remove 3
-        //        1
-        //       / \
-        //     2     7
+        //        7
+        //       /
+        //      1
+        //       \
+        //        2
         assertEquals(3, bst.remove(3));
         assertEquals(3, bst.size());
-        assertEquals(2, bst.height());
+        assertEquals(3, bst.height());
         assertFalse(bst.contains(3));
         try {
             bst.lookup(3);
@@ -164,40 +183,66 @@ class BSTTest {
         // Test removing an element that is not in the tree
         assertNull(bst.remove(6));
         assertEquals(3, bst.size());
-        assertEquals(2, bst.height());
+        assertEquals(3, bst.height());
+
+        // Insert 0 to make 1 a node with two children
+        //        7
+        //       /
+        //      1
+        //     / \
+        //    0   2
+        assertNull(bst.insert(0));
+        assertEquals(4, bst.size());
+
+
 
 
         // Remove 1
         //        7
         //       /
-        //     2
+        //     0
+        //      \
+        //       2
         assertEquals(1, bst.remove(1));
-        assertEquals(2, bst.size());
-        assertEquals(2, bst.height());
+        assertEquals(3, bst.size());
+        assertEquals(3, bst.height());
         assertFalse(bst.contains(1));
         try {
             bst.lookup(1);
             fail("Expected RuntimeException");
         } catch (RuntimeException e) { /* Expected */ }
 
-        // Remove 2
-        //        7
-        assertEquals(2, bst.remove(2));
-        assertEquals(1, bst.size());
-        assertEquals(1, bst.height());
-        assertFalse(bst.contains(2));
-        try {
-            bst.lookup(2);
-            fail("Expected RuntimeException");
-        } catch (RuntimeException e) { /* Expected */ }
-
         // Remove 7
+        //        0
+        //         \
+        //          2
         assertEquals(7, bst.remove(7));
-        assertEquals(0, bst.size());
-        assertEquals(0, bst.height());
+        assertEquals(2, bst.size());
+        assertEquals(2, bst.height());
         assertFalse(bst.contains(7));
         try {
             bst.lookup(7);
+            fail("Expected RuntimeException");
+        } catch (RuntimeException e) { /* Expected */ }
+
+        // Remove 0
+        //        2
+        assertEquals(0, bst.remove(0));
+        assertEquals(1, bst.size());
+        assertEquals(1, bst.height());
+        assertFalse(bst.contains(0));
+        try {
+            bst.lookup(0);
+            fail("Expected RuntimeException");
+        } catch (RuntimeException e) { /* Expected */ }
+
+        // Remove 2
+        assertEquals(2, bst.remove(2));
+        assertEquals(0, bst.size());
+        assertEquals(0, bst.height());
+        assertFalse(bst.contains(2));
+        try {
+            bst.lookup(2);
             fail("Expected RuntimeException");
         } catch (RuntimeException e) { /* Expected */ }
 
@@ -248,7 +293,7 @@ class BSTTest {
         BST<Integer> bst = new BST<>();
 
         bst.insert(4);
-        assertFalse(bst.isPerfect());
+        assertTrue(bst.isPerfect());
 
         bst.insert(2);
         assertFalse(bst.isPerfect());

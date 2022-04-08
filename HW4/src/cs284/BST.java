@@ -5,7 +5,7 @@
 
 package cs284;
 
-import java.util.Random;
+import java.util.NoSuchElementException;
 
 public class BST<E extends Comparable<? super E>> {
 
@@ -18,12 +18,6 @@ public class BST<E extends Comparable<? super E>> {
             this.data = data;
             left = null;
             right = null;
-        }
-
-        Node(E data, Node left, Node right) {
-            this.data = data;
-            this.left = left;
-            this.right = right;
         }
 
         int children() {
@@ -43,15 +37,9 @@ public class BST<E extends Comparable<? super E>> {
             }
             return left != null ? left : right;
         }
-    }
 
-    static class Pair<F, S> {
-        F first;
-        S second;
-
-        Pair(F first, S second) {
-            this.first = first;
-            this.second = second;
+        boolean isLeftChildOf(Node parent) {
+            return parent.left == this;
         }
     }
 
@@ -65,41 +53,53 @@ public class BST<E extends Comparable<? super E>> {
         return size(root);
     }
 
-    private int size(Node rootNode) {
-        if (rootNode == null) {
+    private int size(Node node) {
+        if (node == null) {
             return 0;
         }
-        return 1 + size(rootNode.left) + size(rootNode.right);
+        return 1 + size(node.left) + size(node.right);
     }
 
     public int height() {
         return height(root);
     }
 
-    private int height(Node rootNode) {
-        if (rootNode == null) {
+    private int height(Node node) {
+        if (node == null) {
             return 0;
         }
-        return 1 + Math.max(height(rootNode.left), height(rootNode.right));
+        return 1 + Math.max(height(node.left), height(node.right));
     }
 
     public boolean isPerfect() {
         // A perfect BST of height h has 2^(h-1) - 1 nodes
-        return (size() == (Math.pow(2, height()) - 1));
+        if (size() == (Math.pow(2, height()) - 1)) {
+            return isPerfect(root);
+        }
+        return (size() == 0);
+    }
+
+    private boolean isPerfect(Node node) {
+        if (node == null) {
+            return true;
+        }
+        if (node.children() == 1) {
+            return false;
+        }
+        return isPerfect(node.left) && isPerfect(node.right);
     }
 
     public boolean isDegenerate() {
-        Node current = root;
+        Node node = root;
         try {
-            while (current != null) {
-                current = current.getOnlyChild();
+            while (node != null) {
+                node = node.getOnlyChild();
             }
             return true;
-        } catch (IllegalStateException e) { // thrown if current has more than one child
+        } catch (IllegalStateException e) { // thrown if any node has more than one child
             return false;
         }
     }
-
 
     public E insert(E tgt) { // returns old element
         // Insert into an empty tree
@@ -111,49 +111,57 @@ public class BST<E extends Comparable<? super E>> {
         return insert(root, tgt);
     }
 
-    private E insert(Node current, E tgt) {
+    private E insert(Node node, E tgt) {
         E old = null;
-        int compare = tgt.compareTo(current.data);
-        if (compare == 0) {
-            old = current.data;
-            current.data = tgt;
-        } else if (compare < 0) { // tgt < current.data
-            if (current.left == null) { // insert if current.left does not exist
-                current.left = new Node(tgt);
+        int compare = tgt.compareTo(node.data);
+
+        if (compare == 0) { // tgt == node.data
+            old = node.data;
+            node.data = tgt;
+
+        } else if (compare < 0) { // tgt < node.data
+
+            if (node.left == null) { // insert if node.left does not exist
+                node.left = new Node(tgt);
             } else { // recurse
-                old = insert(current.left, tgt);
+                old = insert(node.left, tgt);
             }
-        } else { // tgt > current.data
-            if (current.right == null) { // insert if current.right does not exist
-                current.right = new Node(tgt);
+
+        } else { // tgt > node.data
+
+            if (node.right == null) { // insert if node.right does not exist
+                node.right = new Node(tgt);
             } else { // recurse
-                old = insert(current.right, tgt);
+                old = insert(node.right, tgt);
             }
         }
         return old;
     }
 
     public E lookup(E tgt) {
+        if (root == null) {
+            throw new NoSuchElementException("Tree is empty");
+        }
         return lookup(root, tgt);
     }
 
-    private E lookup(Node current, E tgt) {
+    private E lookup(Node node, E tgt) {
         // throws exception when not found
-        if (root == null) {
-            throw new RuntimeException("Tree is empty");
-        } else if (tgt.compareTo(current.data) == 0) { // tgt == current
-            return current.data;
-        } else if (tgt.compareTo(current.data) < 0) { // tgt < current
-            return lookup(current.left, tgt);
-        } else { // tgt > current
-            return lookup(current.right, tgt);
+        if (node == null) {
+            throw new NoSuchElementException("Element " + tgt + " not found");
+        } else if (tgt.compareTo(node.data) == 0) { // tgt == node
+            return node.data;
+        } else if (tgt.compareTo(node.data) < 0) { // tgt < node
+            return lookup(node.left, tgt);
+        } else { // tgt > node
+            return lookup(node.right, tgt);
         }
     }
 
     public boolean contains(E tgt) {
         try {
             lookup(tgt);
-        } catch (RuntimeException e) {
+        } catch (NoSuchElementException e) {
             return false;
         }
         return true;
@@ -165,98 +173,85 @@ public class BST<E extends Comparable<? super E>> {
             return null;
         }
         // Remove from a non-empty tree
-        return remove(root, tgt).second;
-    }
-
-    private Pair<Node, E> remove(Node current, E tgt) {
-//        // tgt not in tree
-//        if (current == null) {
-//            return new Pair<>(null, null);
-//        }
-//
-//        Node parent = current;
-//        Node child = null;
-//        E old = null;
-//        int compare = tgt.compareTo(parent.data);
-//        if (compare < 0) { // tgt < current
-//            child = parent.left;
-//            parent.left = remove(child, tgt).first;
-//        } else if (compare > 0) { // tgt > current
-//            child = current.right;
-//            parent.right = remove(child, tgt).first;
-//        }
-//
-//        if (child == null) { // tgt == current
-//
-//        }
-//
-//        return new Pair(null, null);
-        // tgt not in tree
-        if (current == null) {
+        Node toRemoveParent = null;
+        Node toRemove;
+        // Find the node to remove and its parent
+        try {
+            toRemoveParent = getParentNode(root, tgt);
+            // Determine if tgt is the left or right child of the parent
+            if (toRemoveParent.left != null && tgt.compareTo(toRemoveParent.left.data) == 0) {
+                toRemove = toRemoveParent.left;
+            } else {
+                toRemove = toRemoveParent.right;
+            }
+        } catch (NoSuchElementException e) { // tgt is not in the tree
             return null;
+        } catch (RuntimeException e) { // tgt is the root of the tree
+            toRemove = root;
         }
 
-//        int compare = tgt.compareTo(current.data);
-//        if (parent == null) {
-//            if (compare )
-//        }
-//
-//        Node parent = current;
-//        if (compare < 0) { // tgt < current
-//            current = current.left;
-//        } else if (compare > 0) { // tgt > current
-//            current = current.right;
-//        }
+        E old = toRemove.data;
 
+        // If removing the root
+        if (toRemove == root) {
 
-        // --------------------------------------------------
-
-        E old = null;
-        Node child = null;
-        int compare = tgt.compareTo(current.data);
-
-        if (compare == 0) { // tgt == current
-            old = current.data;
-            if (current.left == null) {
-                E data;
-                if (current.right == null) {
-                    data = null;
-                } else {
-                    data = current.right.data;
+            // If the root is singleton node
+            if (root.children() == 0) {
+                root = null;
+            } else {
+                Node min;
+                if (root.left == null) { // root has only right child
+                    root = root.right;
+                } else if (root.right == null) { // root has only left child
+                    root = root.left;
+                } else { // root has two children, find the minimum in the right subtree to replace the root
+                    min = getMin(root.right);
+                    E minValue = min.data;
+                    remove(minValue);
+                    root.data = minValue;
                 }
-                current = new Node(data, null, current.right);
-            } else if (current.right == null) {
-                current = new Node(current.left.data, current.left, null);
-            } else { // two children
-                current = removeMin(current.right).first;
-            }
-        } else { // tgt != current
-            if (compare < 0) { // tgt < current.data
-//                child = remove(current.left, tgt).first;
-                current = new Node(current.data, remove(current.left, tgt).first, current.right);
-            } else { // tgt > current.data
-//                child = remove(current.right, tgt).first;
-                current = new Node(current.data, current.left, remove(current.right, tgt).first);
             }
         }
-        return new Pair<>(current, old);
+
+        // toRemove is a leaf node
+        else if (toRemove.children() == 0) {
+            if (toRemove.isLeftChildOf(toRemoveParent)) {
+                toRemoveParent.left = null;
+            } else {
+                toRemoveParent.right = null;
+            }
+        }
+
+        // toRemove has one child
+        else if (toRemove.children() == 1) {
+            if (toRemove.isLeftChildOf(toRemoveParent)) {
+                toRemoveParent.left = toRemove.getOnlyChild();
+            } else {
+                toRemoveParent.right = toRemove.getOnlyChild();
+            }
+        }
+
+        // toRemove has two children
+        else {
+            if (toRemove.isLeftChildOf(toRemoveParent)) {
+                toRemoveParent.left = toRemove.left;
+                toRemoveParent.left.right = toRemove.right;
+            } else {
+                toRemoveParent.right = toRemove.right;
+                toRemoveParent.right.left = toRemove.left;
+            }
+        }
+        return old;
     }
 
-    private Pair<Node, E> removeMin(Node current) {
-        // tgt not in tree
-        if (current == null) {
+    private Node getMin(Node node) {
+        if (node == null) {
             return null;
         }
-
-        E old = null;
-        if (current.left == null) {
-            old = current.data;
-            current = current.right;
-        } else {
-            removeMin(current.left);
+        if (node.left == null) {
+            return node;
         }
-
-        return new Pair<>(current, old);
+        return getMin(node.left);
     }
 
     public static BST<Integer> makeDegenerate(int size) {
@@ -270,13 +265,14 @@ public class BST<E extends Comparable<? super E>> {
     public static BST<Integer> makePerfect(int height) {
         // Determine the number of nodes in the tree
         int nodes = (int) ((Math.pow(2, height)) - 1);
+        // Create an array of values to insert into the tree
         Integer[] values = new Integer[nodes];
-        // Fill the array with values in sorted order
+        // Fill the array with values [1, nodes] in sorted order
         for (int i = 0; i < nodes; i += 1) {
             values[i] = i + 1;
         }
 
-        // Sorted arrays represent inorder traveral of the tree
+        // Sorted arrays represent inorder traversal of the tree
         BST<Integer> perfectTree = new BST<>();
         perfectTree.root = perfectTree.makePerfectHelper(values, 0, nodes - 1);
 
@@ -293,6 +289,38 @@ public class BST<E extends Comparable<? super E>> {
         newNode.right = makePerfectHelper(values, mid + 1, end);
 
         return newNode;
+    }
+
+    private Node getParentNode(Node node, E tgt) {
+        if (root == null) {
+            throw new NoSuchElementException("Tree is empty");
+        }
+        if (node == null) {
+            throw new NoSuchElementException("Element " + tgt + " not found");
+        }
+        // Check if tgt is the root of the tree
+        if (tgt.compareTo(node.data) == 0) {
+            throw new RuntimeException(tgt + " is the root of the tree");
+        }
+        // Check for tgt on the left
+        if (tgt.compareTo(node.data) < 0) {
+            // Check if tgt is the left child of the node node
+            if (node.left != null && tgt.compareTo(node.left.data) == 0) {
+                return node;
+            } else {
+                return getParentNode(node.left, tgt);
+            }
+
+        } else { // Check for tgt on the right
+            // Check if tgt is the right child of the node node
+            if (node.right != null && tgt.compareTo(node.right.data) == 0) {
+                return node;
+            } else {
+                return getParentNode(node.right, tgt);
+            }
+
+        }
+
     }
 
 }
