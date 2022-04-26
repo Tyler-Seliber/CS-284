@@ -3,12 +3,16 @@ package cs284;
 import java.util.*;
 
 public class ChainedHashMap<K, V> implements Map<K, V> {
-//    private static final double MAX_LOAD_CAPACITY = 0.7;
+    private static final double MAX_LOAD_CAPACITY = 0.7;
 
 
     static class CHMEntry<K, V> {
         public K key;
         public V val;
+
+        public String toString() {
+            return "(K: " + key + ", V: " + val + ")";
+        }
     }
 
     @SuppressWarnings("unchecked") // disable the warnings we'll get from leaving off <>
@@ -80,10 +84,13 @@ public class ChainedHashMap<K, V> implements Map<K, V> {
         // Initialize the bucket if it doesn't exist
         if (table[hash] == null) {
             table[hash] = new LinkedList<>();
-        } else if (containsKey(key)) {
+        }
+        // Check if the key already exists in the bucket
+        if (containsKey(key)) {
             // Check if the key already exists in the bucket
             for (CHMEntry<K, V> e : table[hash]) {
                 if (e.key.equals(key)) {
+                    System.out.print("Replacing " + e.toString() + " with " + entry.toString() + "...");
                     old = e.val;
                     e.val = val;
                     e.key = key;
@@ -128,8 +135,7 @@ public class ChainedHashMap<K, V> implements Map<K, V> {
 
     private void rehashIfNecessary() {
         double loadFactor = (double) size / table.length;
-//        if (loadFactor > MAX_LOAD_CAPACITY) {
-        if (loadFactor > 0.7) {
+        if (loadFactor > MAX_LOAD_CAPACITY) {
             // Copy buckets from table into a new array with double the capacity
             this.table = Arrays.copyOf(table, table.length * 2);
             rehashes++;
