@@ -73,8 +73,6 @@ public class ChainedHashMap<K, V> implements Map<K, V> {
 
     @Override
     public V put(K key, V val) {
-        // Check the current load factor and rehash the table if necessary
-        rehashIfNecessary();
 
         int hash = hash(key);
         CHMEntry<K, V> entry = new CHMEntry<>();
@@ -99,6 +97,9 @@ public class ChainedHashMap<K, V> implements Map<K, V> {
                 }
             }
         } else {
+            // Check the current load factor and rehash the table if necessary
+            rehashIfNecessary();
+
             // Add the entry to the bucket
             table[hash].add(entry);
             size += 1;
@@ -135,7 +136,7 @@ public class ChainedHashMap<K, V> implements Map<K, V> {
             private int hash = 0;
             private int entryIndex = 0;
             private int count = 0;
-            private Entry<K, V> lastVisited = null;
+            private CHMEntry<K, V> lastVisited = null;
 
             private void advance() {
                 // Loop through each hash in the table (each index in the underlying array)
@@ -146,7 +147,7 @@ public class ChainedHashMap<K, V> implements Map<K, V> {
                         if (bucketSizes[i] > 0) {
                             hash = i;
                             entryIndex = j;
-                            lastVisited = (Entry<K, V>) table[i].get(j);
+                            lastVisited = table[i].get(j);
                             count += 1;
                             return;
                         }
@@ -163,7 +164,17 @@ public class ChainedHashMap<K, V> implements Map<K, V> {
             // TODO
             public Entry<K, V> next() {
                 advance();
-                return lastVisited;
+                return new Entry<K, V>() {
+                    @Override
+                    public K key() {
+                        return lastVisited.key;
+                    }
+
+                    @Override
+                    public V value() {
+                        return lastVisited.val;
+                    }
+                };
             }
         };
     }

@@ -38,9 +38,15 @@ public class ChainTest {
         System.out.println();
 
         System.out.println(map.put("DD", null));
-        System.out.println(map.put(null,"swoosh"));
+//        System.out.println(map.put(null,"swoosh"));
         System.out.println(map.get("DD"));
-        System.out.println(map.get(null));
+//        System.out.println(map.get(null));
+
+        System.out.println();
+        System.out.println("Going into for each loop");
+        for (Entry<String, String> entry : map) {
+            System.out.println(entry);
+        }
 
 
     }
