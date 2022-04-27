@@ -44,7 +44,7 @@ public class ChainedHashMap<K, V> implements Map<K, V> {
     @Override
     public int[] bucketSizes() {
         int[] sizes = new int[table.length];
-        for (int i = 0; i < table.length; i++) {
+        for (int i = 0; i < table.length; i += 1) {
             if (table[i] != null) {
                 sizes[i] = table[i].size();
             }
@@ -101,7 +101,7 @@ public class ChainedHashMap<K, V> implements Map<K, V> {
         } else {
             // Add the entry to the bucket
             table[hash].add(entry);
-            size++;
+            size += 1;
         }
         return old;
     }
@@ -119,7 +119,7 @@ public class ChainedHashMap<K, V> implements Map<K, V> {
             if (entry.key.equals(key)) {
                 V old = entry.val;
                 table[hash].remove(entry);
-                size--;
+                size -= 1;
                 return old;
             }
         }
@@ -130,16 +130,40 @@ public class ChainedHashMap<K, V> implements Map<K, V> {
     // TODO
     public Iterator<Entry<K, V>> iterator() {
         return new Iterator<Entry<K, V>>() {
+
+            private int bucketSizes[] = bucketSizes();
+            private int hash = 0;
+            private int entryIndex = 0;
+            private int count = 0;
+            private Entry<K, V> lastVisited = null;
+
+            private void advance() {
+                // Loop through each hash in the table (each index in the underlying array)
+                for (int i = hash; i < table.length; i += 1) {
+                    // Loop through each entry in the bucket in table[i]
+                    for (int j = entryIndex; j < bucketSizes[i]; j += 1) {
+                        // If current bucket is not empty
+                        if (bucketSizes[i] > 0) {
+                            hash = i;
+                            entryIndex = j;
+                            lastVisited = (Entry<K, V>) table[i].get(j);
+                            count += 1;
+                            return;
+                        }
+                    }
+                }
+            }
             @Override
             // TODO
             public boolean hasNext() {
-                return false;
+                return count < size;
             }
 
             @Override
             // TODO
             public Entry<K, V> next() {
-                return null;
+                advance();
+                return lastVisited;
             }
         };
     }
@@ -154,7 +178,7 @@ public class ChainedHashMap<K, V> implements Map<K, V> {
         if (loadFactor > MAX_LOAD_CAPACITY) {
             // Copy buckets from table into a new array with double the capacity
             this.table = Arrays.copyOf(table, table.length * 2);
-            rehashes++;
+            rehashes += 1;
         }
     }
 }
