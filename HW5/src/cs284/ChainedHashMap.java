@@ -45,7 +45,9 @@ public class ChainedHashMap<K, V> implements Map<K, V> {
     public int[] bucketSizes() {
         int[] sizes = new int[table.length];
         for (int i = 0; i < table.length; i++) {
-            sizes[i] = table[i].size();
+            if (table[i] != null) {
+                sizes[i] = table[i].size();
+            }
         }
         return sizes;
     }
@@ -90,7 +92,6 @@ public class ChainedHashMap<K, V> implements Map<K, V> {
             // Check if the key already exists in the bucket
             for (CHMEntry<K, V> e : table[hash]) {
                 if (e.key.equals(key)) {
-                    System.out.print("Replacing " + e.toString() + " with " + entry.toString() + "...");
                     old = e.val;
                     e.val = val;
                     e.key = key;
@@ -107,6 +108,21 @@ public class ChainedHashMap<K, V> implements Map<K, V> {
 
     @Override
     public V remove(K key) {
+        if (size == 0) {
+            return null;
+        }
+        int hash = hash(key);
+        if (table[hash] == null) {
+            return null;
+        }
+        for (CHMEntry<K, V> entry : table[hash]) {
+            if (entry.key.equals(key)) {
+                V old = entry.val;
+                table[hash].remove(entry);
+                size--;
+                return old;
+            }
+        }
         return null;
     }
 
