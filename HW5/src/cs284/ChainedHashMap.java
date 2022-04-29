@@ -1,18 +1,19 @@
+/*
+    Name: Tyler Seliber
+    Honor Pledge: I pledge my honor that I have abided by the Stevens Honor System.
+ */
+
 package cs284;
 
 import java.util.*;
 
 public class ChainedHashMap<K, V> implements Map<K, V> {
-    private static final double MAX_LOAD_CAPACITY = 0.7;
 
+    private static final double MAX_LOAD_CAPACITY = 0.7;
 
     static class CHMEntry<K, V> {
         public K key;
         public V val;
-
-        public String toString() {
-            return "(K: " + key + ", V: " + val + ")";
-        }
     }
 
     @SuppressWarnings("unchecked") // disable the warnings we'll get from leaving off <>
@@ -43,8 +44,8 @@ public class ChainedHashMap<K, V> implements Map<K, V> {
 
     @Override
     public int[] bucketSizes() {
-        int[] sizes = new int[table.length];
-        for (int i = 0; i < table.length; i += 1) {
+        int[] sizes = new int[capacity()];
+        for (int i = 0; i < capacity(); i += 1) {
             if (table[i] != null) {
                 sizes[i] = table[i].size();
             }
@@ -54,10 +55,13 @@ public class ChainedHashMap<K, V> implements Map<K, V> {
 
     @Override
     public V get(K key) {
+        // Get the hash code of the key
         int hash = hash(key);
-        if (table[hash] == null) {
+        // If there is no bucket at the hash code, return null
+        if (table[hash] == null || table[hash].isEmpty()) {
             return null;
         }
+        // Iterate through the bucket to find the key
         for (CHMEntry<K, V> entry : table[hash]) {
             if (entry.key.equals(key)) {
                 return entry.val;
@@ -73,58 +77,57 @@ public class ChainedHashMap<K, V> implements Map<K, V> {
 
     @Override
     public V put(K key, V val) {
-
+        // Get the hash code of the key
         int hash = hash(key);
-        CHMEntry<K, V> entry = new CHMEntry<>();
-        entry.key = key;
-        entry.val = val;
-
-        V oldVal = null;
 
         // Initialize the bucket if it doesn't exist
         if (table[hash] == null || table[hash].isEmpty()) {
             table[hash] = new LinkedList<>();
         }
+
         // Check if the key already exists in the bucket
         if (containsKey(key)) {
             // Check if the key already exists in the bucket
             for (CHMEntry<K, V> e : table[hash]) {
                 if (e.key.equals(key)) {
-                    oldVal = e.val;
+                    V oldVal = e.val;
                     e.val = val;
                     e.key = key;
+                    // Return the old value
                     return oldVal;
                 }
             }
         } else {
-            // Check the current load factor and rehash the table if necessary
+            // Check if load factor after addition of entry is too high, rehash the map if necessary
             if (rehashIfNecessary()) {
-                // Recalculate the hash
+                // Recalculate the hash for key
                 hash = hash(key);
-
+                // Initialize the bucket if it doesn't exist after rehashing
                 if (table[hash] == null || table[hash].isEmpty()) {
                     table[hash] = new LinkedList<>();
                 }
             }
 
+            // Create the new entry
+            CHMEntry<K, V> entry = new CHMEntry<>();
+            entry.key = key;
+            entry.val = val;
+
             // Add the entry to the bucket
             table[hash].add(entry);
             size += 1;
         }
-        return oldVal;
+        return null;
     }
 
     @Override
     public V remove(K key) {
-        // Return null if map is empty
-        if (size == 0) {
-            return null;
-        }
         int hash = hash(key);
-        // Return null if the bucket is empty
-        if (table[hash] == null) {
+        // Return null if the map or bucket is empty
+        if (size == 0 || table[hash] == null || table[hash].isEmpty()) {
             return null;
         }
+        // Iterate through the bucket at index hash to find the key
         for (CHMEntry<K, V> entry : table[hash]) {
             if (entry.key.equals(key)) {
                 V old = entry.val;
@@ -142,25 +145,19 @@ public class ChainedHashMap<K, V> implements Map<K, V> {
     }
 
     @Override
-    // TODO
     public Iterator<Entry<K, V>> iterator() {
         return new Iterator<>() {
 
-            private int bucketSizes[] = bucketSizes();
-            private int hash = 0;
-            private int entryIndex = 0;
-            private int count = 0;
-            private CHMEntry<K, V> lastVisited = null;
+            private final int[] bucketSizes = bucketSizes(); // Keep track of the bucket sizes
+            private int hash = 0; // Keep track of current array index in table
+            private int entryIndex = 0; // Keep track of the current entry's index in the bucket
+            private int count = 0; // Keep track of the number of entries iterated through
+            private CHMEntry<K, V> lastVisited = null; // Keep track of the last visited entry
 
-            // Might need to change so advance doesn't modify anything while we're at current entry. The next() method should update the lastVisited instead.
-            // Make advance() idempotent: (idem = same, potent = power) -> running it 1 time or 100 times won't do anything different, it gets you to the right spot
-            // Invariant would be whether you are at a valid spot or you have reached the end
             private void advance() {
                 // Loop through each hash in the table (each index in the underlying array)
-//                for (int i = hash; i < table.length; i += 1) {
-                while (hash < table.length) {
+                while (hash < capacity()) {
                     // Loop through each entry in the bucket in table[i]
-//                    for (int j = entryIndex; j < bucketSizes[i]; j += 1) {
                     while (entryIndex < bucketSizes[hash]) {
                         // If current bucket is not empty
                         if (bucketSizes[hash] > 0) {
@@ -175,14 +172,13 @@ public class ChainedHashMap<K, V> implements Map<K, V> {
                     entryIndex = 0;
                 }
             }
+
             @Override
-            // TODO
             public boolean hasNext() {
                 return count < size;
             }
 
             @Override
-            // TODO
             public Entry<K, V> next() {
                 advance();
                 return new Entry<K, V>() {
@@ -195,35 +191,40 @@ public class ChainedHashMap<K, V> implements Map<K, V> {
                     public V value() {
                         return lastVisited.val;
                     }
-
-                    public String toString() {
-                        return "(K: " + key() + ", V: " + value() + ")";
-                    }
                 };
             }
         };
     }
 
+    // Get the hash code for a given key
     private int hash(K key) {
         int hash = Objects.hashCode(key);
         return Math.abs(hash) % table.length;
     }
 
+    // Check if load factor is greater than max load factor, if so rehash the
+    // Returns true if rehashing occurred, false otherwise
     private boolean rehashIfNecessary() {
+        // Calculate load factor before adding a new entry
         double loadFactor = (double) (size + 1) / capacity();
+
+        // Check if we need to rehash
         if (loadFactor > MAX_LOAD_CAPACITY) {
+
             // Copy buckets from table into a new array with double the capacity
             LinkedList<CHMEntry>[] oldTable = Arrays.copyOf(table, capacity());
+
+            // Reinitialize the table with the new capacity
             this.table = new LinkedList[capacity() * 2];
             this.size = 0;
 
+            // Copy the entries from the old table into the new table
             for (LinkedList<CHMEntry> bucket : oldTable) {
                 if (bucket != null) {
                     for (CHMEntry<K, V> entry : bucket) {
                         put(entry.key, entry.val);
                     }
                 }
-
             }
             this.rehashes += 1;
             return true;
